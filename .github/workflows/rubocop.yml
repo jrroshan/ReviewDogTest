@@ -5,6 +5,9 @@ permissions:
   pull-requests: write
 jobs:
   rubocop:
+    - name: Debug
+      uses: hmarr/debug-action@v2
+
     name: runner / rubocop
     runs-on: ubuntu-latest
     steps:
@@ -12,10 +15,23 @@ jobs:
         uses: actions/checkout@v1
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2.2
+          ruby-version: gemfile
       - name: rubocop
         uses: reviewdog/action-rubocop@v2
         with:
           rubocop_version: gemfile
           rubocop_extensions: rubocop-rails:gemfile rubocop-rspec:gemfile
           reporter: github-pr-review # Default is github-pr-check
+
+    - name: Setup Jruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: gemfile
+          bundler-cache: true
+
+    - name: Set Environment Variables
+        run: |
+          echo "REVIEWDOG_GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+      - name: Run Rubocop
+        run: |
+          sh ./rubocop.sh
